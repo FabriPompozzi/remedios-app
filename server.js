@@ -5,13 +5,32 @@ const db = require('./database');
 
 const app = express();
 
+const TIME_ZONE = 'America/Argentina/Buenos_Aires';
+
+function getTodayInTimeZone() {
+  const today = new Date();
+
+  const dateStr = today.toLocaleDateString(
+    'sv-SE',
+    { timeZone: TIME_ZONE }
+  );
+
+  const day = new Date(
+    `${dateStr}T00:00:00Z`
+  ).getUTCDay();
+
+  return {
+    dateStr,
+    day
+  };
+}
+
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/medicamentos', (req, res) => {
-  const hoy = new Date().toLocaleDateString('sv-SE');
-  const diaSemana = new Date().getDay();
+  const { dateStr, day } = getTodayInTimeZone();
 
   const medicamentos = db.prepare(`
     SELECT
@@ -36,7 +55,7 @@ app.get('/api/medicamentos', (req, res) => {
     AND m.dias LIKE ?
 
     ORDER BY m.horario
-  `).all(hoy, `%${diaSemana}%`);
+  `).all(dateStr, `%${day}%`);
 
   res.json(medicamentos);
 });
@@ -72,20 +91,20 @@ app.post('/api/medicamentos', (req, res) => {
 app.post('/api/medicamentos/:id/tomar', (req, res) => {
   const medicamentoId = req.params.id;
 
-  const hoy = new Date().toLocaleDateString('sv-SE');
+  const { dateStr } = getTodayInTimeZone();
 
   const existe = db.prepare(`
     SELECT * FROM tomas
     WHERE medicamento_id = ?
     AND fecha = ?
-  `).get(medicamentoId, hoy);
+  `).get(medicamentoId, dateStr);
 
   if (existe) {
     db.prepare(`
       DELETE FROM tomas
       WHERE medicamento_id = ?
       AND fecha = ?
-    `).run(medicamentoId, hoy);
+    `).run(medicamentoId, dateStr);
 
     return res.json({
       tomado: false
@@ -95,7 +114,7 @@ app.post('/api/medicamentos/:id/tomar', (req, res) => {
   db.prepare(`
     INSERT INTO tomas (medicamento_id, fecha)
     VALUES (?, ?)
-  `).run(medicamentoId, hoy);
+  `).run(medicamentoId, dateStr);
 
   res.json({
     tomado: true
@@ -139,6 +158,21 @@ app.put('/api/medicamentos/:id', (req, res) => {
   res.json({
     ok: true
   });
+});
+
+app.get('/api/historial', (req, res) => {
+  const historial = db.prepare(`
+    SELECT
+      t.fecha,
+      m.nombre,
+      m.horario
+    FROM tomas t
+    JOIN medicamentos m
+      ON m.id = t.medicamento_id
+    ORDER BY t.fecha DESC
+  `).all();
+
+  res.json(historial);
 });
 
 //todo, sacar cuando haga el commit final

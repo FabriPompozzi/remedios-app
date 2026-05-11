@@ -142,6 +142,26 @@ button:hover {
   min-width: 100px;
 }
 
+.confirmacion {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  font-size: 0.9rem;
+
+  color: #444;
+}
+
+.boton-peligro {
+  background: #e53935;
+}
+
+.boton-secundario {
+  background: #9e9e9e;
+}
+
 .dias,
 .dias-edicion {
   display: flex;
@@ -194,4 +214,74 @@ button:hover {
   color: #444;
 
   font-size: 1.2rem;
+}
+
+#calendar {
+  background: white;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  margin-top: 20px;
+}
+
+.fc {
+  font-size: 0.9rem;
+}
+
+.fc-toolbar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fc-toolbar-title {
+  font-size: 1.2rem !important;
+}
+
+.fc-button {
+  border-radius: 8px !important;
+}
+
+.fc-event {
+  border: none !important;
+
+  padding: 2px 4px;
+
+  border-radius: 6px;
+
+  font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .remedio {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .acciones {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .acciones button {
+    flex: 1;
+  }
+
+  .fc-toolbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fc-daygrid-event {
+    white-space: normal !important;
+  }
 }

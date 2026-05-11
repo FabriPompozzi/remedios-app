@@ -1,4 +1,5 @@
 let editingId = null;
+let deletingId = null;
 
 /* =========================
    HELPERS
@@ -128,17 +129,32 @@ function renderMedicamento(med, lista) {
       </div>
 
       <div class="acciones">
-        <button onclick="toggleTomado(${med.id})">
-          ${med.tomado ? '✓ Tomado' : 'Tomar'}
-        </button>
+        ${deletingId === med.id
+          ? `
+            <div class="confirmacion">
+              <span>¿Borrar?</span>
+              <button class="boton-peligro" onclick="confirmarBorrado(${med.id})">
+                Confirmar
+              </button>
+              <button class="boton-secundario" onclick="cancelarBorrado()">
+                Cancelar
+              </button>
+            </div>
+          `
+          : `
+            <button onclick="toggleTomado(${med.id})">
+              ${med.tomado ? '✓ Tomado' : 'Tomar'}
+            </button>
 
-        <button onclick="editarMedicamento(${med.id})">
-          Editar
-        </button>
+            <button onclick="editarMedicamento(${med.id})">
+              Editar
+            </button>
 
-        <button onclick="borrarMedicamento(${med.id})">
-          Borrar
-        </button>
+            <button class="boton-peligro" onclick="solicitarBorrado(${med.id})">
+              Borrar
+            </button>
+          `
+        }
       </div>
     `;
 
@@ -259,6 +275,7 @@ async function agregarMedicamento() {
   mostrarToast('Medicamento agregado');
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
 async function toggleTomado(id) {
@@ -270,36 +287,105 @@ async function toggleTomado(id) {
   );
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
-async function borrarMedicamento(id) {
-  const confirmar = confirm(
-    '¿Borrar medicamento?'
+let calendar = null;
+
+async function cargarCalendario() {
+  const response = await fetch('/api/historial');
+
+  const historial = await response.json();
+
+  const eventos = historial.map(item => ({
+    title: `${item.horario} - ${item.nombre}`,
+    start: item.fecha,
+    allDay: true,
+    backgroundColor: '#4caf50',
+    borderColor: '#4caf50'
+  }));
+
+  const calendarEl =
+    document.getElementById('calendar');
+
+  if (calendar) {
+    calendar.destroy();
+  }
+
+  calendar = new FullCalendar.Calendar(
+    calendarEl,
+    {
+      initialView: 'dayGridMonth',
+
+      locale: 'es',
+
+      height: 'auto',
+
+      events: eventos,
+
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: ''
+      },
+
+      buttonText: {
+        today: 'Hoy'
+      },
+
+      eventDisplay: 'block'
+    }
   );
 
-  if (!confirmar) {
-    return;
-  }
+  calendar.render();
+
+  window.addEventListener('resize', () => {
+    calendar.updateSize();
+  });
+}
+
+function solicitarBorrado(id) {
+  deletingId = id;
+
+  cargarMedicamentos();
+  cargarCalendario();
+}
+
+function cancelarBorrado() {
+  deletingId = null;
+
+  cargarMedicamentos();
+  cargarCalendario();
+}
+
+async function confirmarBorrado(id) {
 
   await fetch(`/api/medicamentos/${id}`, {
     method: 'DELETE'
   });
 
+  deletingId = null;
+
   mostrarToast('Medicamento borrado');
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
 function editarMedicamento(id) {
   editingId = id;
+  deletingId = null;
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
 function cancelarEdicion() {
   editingId = null;
+  deletingId = null;
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
 async function guardarEdicion(id) {
@@ -350,10 +436,12 @@ async function guardarEdicion(id) {
   });
 
   editingId = null;
+  deletingId = null;
 
   mostrarToast('Medicamento actualizado');
 
   cargarMedicamentos();
+  cargarCalendario();
 }
 
 /* =========================
@@ -367,6 +455,7 @@ document
     agregarMedicamento
   );
 
-actualizarFecha();
 
+actualizarFecha();
 cargarMedicamentos();
+cargarCalendario();
