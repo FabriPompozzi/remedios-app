@@ -1,0 +1,8 @@
+services:
+  remedios-app:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data

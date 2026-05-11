@@ -1,0 +1,12 @@
+{
+  "name": "remedios-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "express": "^5.1.0"
+  }
+}

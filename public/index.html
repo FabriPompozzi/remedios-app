@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Remedios</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  >
+</head>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<body>
+
+  <h1>Remedios de Hoy</h1>
+
+  <div id="fecha-hoy" class="fecha-hoy"></div>
+
+  <div class="formulario">
+    <input id="nombre" type="text" placeholder="Nombre del remedio">
+
+    <input id="horario" type="time">
+
+    <input id="dosis" type="text" placeholder="Dosis"/>
+
+    <div class="dias">
+      <label><input type="checkbox" value="1" checked> L</label>
+      <label><input type="checkbox" value="2" checked> M</label>
+      <label><input type="checkbox" value="3" checked> X</label>
+      <label><input type="checkbox" value="4" checked> J</label>
+      <label><input type="checkbox" value="5" checked> V</label>
+      <label><input type="checkbox" value="6" checked> S</label>
+      <label><input type="checkbox" value="0" checked> D</label>
+    </div>
+
+    <button id="agregar">Agregar</button>
+  </div>
+
+  <div id="lista"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
