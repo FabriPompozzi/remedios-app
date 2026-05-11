@@ -1,5 +1,8 @@
 let editingId = null;
 let deletingId = null;
+let mostrarTodos = false;
+const TIME_ZONE = 'America/Argentina/Buenos_Aires';
+let confirmarHistorial = false;
 
 /* =========================
    HELPERS
@@ -25,6 +28,46 @@ function actualizarFecha() {
 
   document.getElementById('fecha-hoy').innerText =
     texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function getTodayDayIndex() {
+  const ahora = new Date();
+  const fechaZona = new Date(
+    ahora.toLocaleString('en-US', {
+      timeZone: TIME_ZONE
+    })
+  );
+
+  return fechaZona.getDay();
+}
+
+function actualizarVistaUI() {
+  const titulo = document.getElementById('titulo-vista');
+  const boton = document.getElementById('toggle-vista');
+
+  if (mostrarTodos) {
+    titulo.innerText = 'Todos los remedios';
+    boton.innerText = 'Ver solo hoy';
+  } else {
+    titulo.innerText = 'Remedios de Hoy';
+    boton.innerText = 'Ver todos';
+  }
+}
+
+function actualizarHistorialUI() {
+  const botonBorrar = document.getElementById('historial-borrar');
+  const botonConfirmar = document.getElementById('historial-confirmar');
+  const botonCancelar = document.getElementById('historial-cancelar');
+
+  if (confirmarHistorial) {
+    botonBorrar.classList.add('oculto');
+    botonConfirmar.classList.remove('oculto');
+    botonCancelar.classList.remove('oculto');
+  } else {
+    botonBorrar.classList.remove('oculto');
+    botonConfirmar.classList.add('oculto');
+    botonCancelar.classList.add('oculto');
+  }
 }
 
 function renderGrupo(titulo, meds, lista) {
@@ -55,6 +98,17 @@ function renderMedicamento(med, lista) {
   const diasSeleccionados = med.dias
     ? med.dias.split(',')
     : [];
+
+  const diasOrdenados = [1, 2, 3, 4, 5, 6, 0];
+  const etiquetasDias = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  const diasTexto = diasOrdenados
+    .filter((dia) => diasSeleccionados.includes(String(dia)))
+    .map((dia) => etiquetasDias[dia])
+    .join(', ');
+
+  const puedeTomar = diasSeleccionados.includes(
+    String(getTodayDayIndex())
+  );
 
   div.innerHTML = editingId === med.id
     ? `
@@ -126,6 +180,10 @@ function renderMedicamento(med, lista) {
         <div class="dosis">
           ${med.dosis || ''}
         </div>
+
+        <div class="dias-texto">
+          Días: ${diasTexto || '-'}
+        </div>
       </div>
 
       <div class="acciones">
@@ -142,9 +200,14 @@ function renderMedicamento(med, lista) {
             </div>
           `
           : `
-            <button onclick="toggleTomado(${med.id})">
-              ${med.tomado ? '✓ Tomado' : 'Tomar'}
-            </button>
+            ${puedeTomar
+              ? `
+                <button onclick="toggleTomado(${med.id})">
+                  ${med.tomado ? '✓ Tomado' : 'Tomar'}
+                </button>
+              `
+              : ''
+            }
 
             <button onclick="editarMedicamento(${med.id})">
               Editar
@@ -166,7 +229,11 @@ function renderMedicamento(med, lista) {
 ========================= */
 
 async function cargarMedicamentos() {
-  const response = await fetch('/api/medicamentos');
+  const endpoint = mostrarTodos
+    ? '/api/medicamentos/todos'
+    : '/api/medicamentos';
+
+  const response = await fetch(endpoint);
 
   const medicamentos = await response.json();
 
@@ -211,6 +278,16 @@ async function cargarMedicamentos() {
     grupos.noche,
     lista
   );
+}
+
+function toggleVista() {
+  mostrarTodos = !mostrarTodos;
+  editingId = null;
+  deletingId = null;
+
+  actualizarVistaUI();
+  cargarMedicamentos();
+  cargarCalendario();
 }
 
 /* =========================
@@ -279,14 +356,44 @@ async function agregarMedicamento() {
 }
 
 async function toggleTomado(id) {
-  await fetch(
+  const response = await fetch(
     `/api/medicamentos/${id}/tomar`,
     {
       method: 'POST'
     }
   );
 
+  const result = await response.json();
+
+  if (result.yaRegistrado) {
+    mostrarToast('Ya estaba registrado');
+  } else {
+    mostrarToast('Medicamento tomado');
+  }
+
   cargarMedicamentos();
+  cargarCalendario();
+}
+
+function solicitarBorradoHistorial() {
+  confirmarHistorial = true;
+  actualizarHistorialUI();
+}
+
+function cancelarBorradoHistorial() {
+  confirmarHistorial = false;
+  actualizarHistorialUI();
+}
+
+async function confirmarBorradoHistorial() {
+  await fetch('/api/historial', {
+    method: 'DELETE'
+  });
+
+  confirmarHistorial = false;
+  actualizarHistorialUI();
+  mostrarToast('Historial borrado');
+
   cargarCalendario();
 }
 
@@ -455,7 +562,25 @@ document
     agregarMedicamento
   );
 
+document
+  .getElementById('toggle-vista')
+  .addEventListener('click', toggleVista);
+
+document
+  .getElementById('historial-borrar')
+  .addEventListener('click', solicitarBorradoHistorial);
+
+document
+  .getElementById('historial-confirmar')
+  .addEventListener('click', confirmarBorradoHistorial);
+
+document
+  .getElementById('historial-cancelar')
+  .addEventListener('click', cancelarBorradoHistorial);
+
 
 actualizarFecha();
+actualizarVistaUI();
+actualizarHistorialUI();
 cargarMedicamentos();
 cargarCalendario();

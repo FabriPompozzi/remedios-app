@@ -20,6 +20,24 @@ h1 {
   margin-bottom: 30px;
 }
 
+.encabezado {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.encabezado h1 {
+  margin: 0;
+
+  text-align: left;
+}
+
 .formulario {
   background: white;
 
@@ -92,6 +110,8 @@ button:hover {
   gap: 16px;
 
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  flex-wrap: wrap;
 }
 
 .tomado {
@@ -126,6 +146,12 @@ button:hover {
   font-size: 0.95rem;
 }
 
+.dias-texto {
+  color: #666;
+
+  font-size: 0.9rem;
+}
+
 .info input {
   margin-bottom: 4px;
 }
@@ -136,6 +162,8 @@ button:hover {
   flex-direction: column;
 
   gap: 8px;
+
+  align-items: stretch;
 }
 
 .acciones button {
@@ -162,6 +190,32 @@ button:hover {
   background: #9e9e9e;
 }
 
+#toggle-vista {
+  min-width: 140px;
+}
+
+.historial-encabezado {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 10px;
+}
+
+.historial-acciones {
+  display: flex;
+
+  gap: 8px;
+}
+
+.oculto {
+  display: none;
+}
+
 .dias,
 .dias-edicion {
   display: flex;
@@ -180,19 +234,77 @@ button:hover {
   gap: 4px;
 
   font-size: 0.9rem;
+
+  min-width: 44px;
+
+  padding: 4px 6px;
+
+  border-radius: 6px;
+
+  background: #f7f7f7;
+}
+
+.dias input[type="checkbox"],
+.dias-edicion input[type="checkbox"] {
+  margin: 0;
 }
 
 @media (max-width: 600px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .encabezado h1 {
+    text-align: center;
+  }
+
+  #toggle-vista {
+    width: 100%;
+  }
+
+  .historial-encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .historial-acciones {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .historial-acciones button {
+    width: 100%;
+  }
+
   .remedio {
     flex-direction: column;
+    padding: 16px;
+    gap: 12px;
   }
 
   .acciones {
     width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .acciones button {
-    width: 100%;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .dias,
+  .dias-edicion {
+    gap: 6px;
+  }
+
+  .dias label,
+  .dias-edicion label {
+    min-width: 48px;
+
+    justify-content: center;
   }
 }
 
@@ -226,6 +338,8 @@ button:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 
   margin-top: 20px;
+
+  overflow: hidden;
 }
 
 .fc {
@@ -260,25 +374,23 @@ button:hover {
     padding: 10px;
   }
 
-  .remedio {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .acciones {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .acciones button {
-    flex: 1;
-  }
-
   .fc-toolbar {
     flex-direction: column;
     align-items: center;
+  }
+
+  .fc-toolbar-title {
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .fc .fc-scrollgrid,
+  .fc .fc-scrollgrid-section {
+    width: 100% !important;
+  }
+
+  #calendar {
+    padding: 10px;
   }
 
   .fc-daygrid-event {

@@ -20,7 +20,10 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <body>
 
-  <h1>Remedios de Hoy</h1>
+  <div class="encabezado">
+    <h1 id="titulo-vista">Remedios de Hoy</h1>
+    <button id="toggle-vista" class="boton-secundario">Ver todos</button>
+  </div>
 
   <div id="fecha-hoy" class="fecha-hoy"></div>
 
@@ -46,7 +49,14 @@
 
   <div id="lista"></div>
 
-  <h2>Historial</h2>
+  <div class="historial-encabezado">
+    <h2>Historial</h2>
+    <div class="historial-acciones">
+      <button id="historial-borrar" class="boton-peligro">Borrar historial</button>
+      <button id="historial-confirmar" class="boton-peligro oculto">Confirmar</button>
+      <button id="historial-cancelar" class="boton-secundario oculto">Cancelar</button>
+    </div>
+  </div>
 
   <div id="calendar"></div>
 

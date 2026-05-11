@@ -60,6 +60,34 @@ app.get('/api/medicamentos', (req, res) => {
   res.json(medicamentos);
 });
 
+app.get('/api/medicamentos/todos', (req, res) => {
+  const { dateStr } = getTodayInTimeZone();
+
+  const medicamentos = db.prepare(`
+    SELECT
+      m.id,
+      m.nombre,
+      m.horario,
+      m.dosis,
+      m.dias,
+
+      CASE
+        WHEN t.id IS NOT NULL THEN 1
+        ELSE 0
+      END AS tomado
+
+    FROM medicamentos m
+
+    LEFT JOIN tomas t
+      ON t.medicamento_id = m.id
+      AND t.fecha = ?
+
+    ORDER BY m.horario
+  `).all(dateStr);
+
+  res.json(medicamentos);
+});
+
 app.post('/api/medicamentos', (req, res) => {
     try {
       const { nombre, horario, dosis, dias } = req.body;
@@ -100,14 +128,9 @@ app.post('/api/medicamentos/:id/tomar', (req, res) => {
   `).get(medicamentoId, dateStr);
 
   if (existe) {
-    db.prepare(`
-      DELETE FROM tomas
-      WHERE medicamento_id = ?
-      AND fecha = ?
-    `).run(medicamentoId, dateStr);
-
     return res.json({
-      tomado: false
+      tomado: true,
+      yaRegistrado: true
     });
   }
 
@@ -117,7 +140,8 @@ app.post('/api/medicamentos/:id/tomar', (req, res) => {
   `).run(medicamentoId, dateStr);
 
   res.json({
-    tomado: true
+    tomado: true,
+    yaRegistrado: false
   });
 });
 
@@ -173,6 +197,16 @@ app.get('/api/historial', (req, res) => {
   `).all();
 
   res.json(historial);
+});
+
+app.delete('/api/historial', (req, res) => {
+  db.prepare(`
+    DELETE FROM tomas
+  `).run();
+
+  res.json({
+    ok: true
+  });
 });
 
 //todo, sacar cuando haga el commit final
